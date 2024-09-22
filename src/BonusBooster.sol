@@ -10,6 +10,7 @@ import {LibString} from "@solady/contracts/utils/LibString.sol";
 
 /* Bonus Libraries */
 import {BonusErrors} from "src/libraries/BonusErrors.sol";
+import {BonusEvents} from "src/libraries/BonusEvents.sol";
 import {ContractCheck} from "src/libraries/ContractCheck.sol";
 
 /**
@@ -51,6 +52,9 @@ contract BonusBooster is ERC721, Ownable {
 
     // Mapping as a way to keep track of if a user has minted
     mapping(address holder => bool status) public mintStatusOf;
+
+    // Mapping to keep track of how many times a user boosted
+    mapping(address holder => uint8 boostedAmounts) public boostsOf;
 
     //     ______                 __                  __
     //    / ____/___  ____  _____/ /________  _______/ /_____  _____
@@ -175,6 +179,12 @@ contract BonusBooster is ERC721, Ownable {
 
         // Burn the booster
         _burn(_id);
+
+        // Increment boosts of
+        boostsOf[msg.sender]++;
+
+        // Emit event with relevant info
+        emit BonusEvents.Boost(msg.sender, boostsOf[msg.sender], _id);
     }
 
     //     ____        __         ____                              ______                 __  _
