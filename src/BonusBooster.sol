@@ -183,15 +183,24 @@ contract BonusBooster is ERC721, Ownable {
         baseUri = _newBaseUri;
     }
 
-    function whitelistUser(address _user) external onlyOwner() {
+    /**
+     * @notice
+     *  Function to toggel whitelist. I did a toggle design so that the plattform have control
+     *  to blacklist whitelisted wallets if they so choose to do so
+     *
+     * @param _user the persons wallet we are about to toggle
+     * @param _status the status we are about to set associated with the wallet
+     *
+     */
+    function toggleWhitelist(address _user, bool _status) external onlyOwner() {
         // Make sure that user isnt contract
         if (_user.isContract()) revert BonusErrors.CANT_WHITELIST_CONTRACTS();
 
         // Make sure user isnt already whitelisted
-        if (whitelist[_user]) revert BonusErrors.ALREADY_WHITELISTED();
+        if (whitelist[_user] && _status) revert BonusErrors.ALREADY_WHITELISTED();
 
         unchecked {
-            whitelist[_user] = true;
+            whitelist[_user] = _status;
         }
     }
 }
