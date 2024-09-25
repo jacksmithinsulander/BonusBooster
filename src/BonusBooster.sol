@@ -14,15 +14,6 @@ import {BonusEvents} from "src/libraries/BonusEvents.sol";
 import {ContractCheck} from "src/libraries/ContractCheck.sol";
 
 /**
- * @notice
- *  Helper interface for balance of function in ERC20
- *
- */
-interface IERC20 {
-    function balanceOf(address who) external view returns(uint256);
-}
-
-/**
  * @title Bonus Booster
  * @notice Minting contract to manage users boost
  * @author https://x.com/0xjsieth
@@ -41,9 +32,6 @@ contract BonusBooster is ERC721, Ownable {
     //   ___/ / /_/ /_/ / /_/  __(__  )
     //  /____/\__/\__,_/\__/\___/____/
 
-    // Token instance
-    IERC20 token;
-
     // Base uri for nft hosting
     string private baseUri;
 
@@ -56,6 +44,9 @@ contract BonusBooster is ERC721, Ownable {
     // Mapping to keep track of how many times a user boosted
     mapping(address holder => uint8 boostedAmounts) public boostsOf;
 
+    // Mapping to keep track of whitelisting
+    mapping(address person => bool status) public whitelist; 
+
     //     ______                 __                  __
     //    / ____/___  ____  _____/ /________  _______/ /_____  _____
     //   / /   / __ \/ __ \/ ___/ __/ ___/ / / / ___/ __/ __ \/ ___/
@@ -66,16 +57,12 @@ contract BonusBooster is ERC721, Ownable {
      * @notice
      *  Constructor for Bonus Booster contract, sets some global variables
      *
-     * @param _token address of token
      * @param _baseUri Base Uri for hosted token info
      *
      */
-    constructor (address _token, string memory _baseUri) {
+    constructor (string memory _baseUri) {
         // Set base uri
         baseUri = _baseUri;
-
-        // Create token instance
-        token = IERC20(_token);
 
         // Set deployer as owner
         _initializeOwner(msg.sender);
@@ -131,23 +118,12 @@ contract BonusBooster is ERC721, Ownable {
 
     /**
      * @notice
-     *  Returns the address of the token
-     *
-     * @return _token address of the token
-     *
-     */
-    function getTokenAddress() external view returns (address _token) {
-        _token = address(token);
-    }
-
-    /**
-     * @notice
      *  Minting function for the booster
      *
      */
     function mintBooster() external {
-        // Check if user has any tokens, if not, revert
-        if (token.balanceOf(msg.sender) < 1) revert BonusErrors.YOU_DO_NOT_OWN_ANY_OP();
+        // Check if user is on whitelist
+        if (!whitelist[msg.sender]) revert BonusErrors.YOU_ARE_NOT_ON_THE_WHITELIST();
 
         // Check if user has already minted a booster, if so, revert
         if (mintStatusOf[msg.sender]) revert BonusErrors.ALREADY_MINTED();
@@ -160,6 +136,7 @@ contract BonusBooster is ERC721, Ownable {
             // Increment the current index
             currentIndex++;
 
+            // Set mintstatus
             mintStatusOf[msg.sender] = true;
         }
     }
@@ -206,20 +183,15 @@ contract BonusBooster is ERC721, Ownable {
         baseUri = _newBaseUri;
     }
 
-    /**
-     * @notice
-     *  For emergencies, allows the deployer to switch the token address in case it is needed in order to
-     *  not mess up the contract perpetually in case a server goes down or something
-     *
-     * @param _newToken address of the new token
-     *
-     */
-    function resetTokenAddress(address _newToken) external onlyOwner {
-        // Check if address is a contract, if not, revert
-        if (!_newToken.isContract()) revert BonusErrors.NOT_A_CONTRACT();
+    function whitelistUser(address _user) external onlyOwner() {
+        // Make sure that user isnt contract
+        if (_user.isContract()) revert BonusErrors.CANT_WHITELIST_CONTRACTS();
+
+        // Make sure user isnt already whitelisted
+        if (whitelist[_user]) revert BonusErrors.ALREADY_WHITELISTED();
 
         unchecked {
-            token = IERC20(_newToken);
+            whitelist[_user] = true;
         }
     }
 }

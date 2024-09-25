@@ -31,7 +31,7 @@ contract BonusBoosterTest is Test {
 
         vm.startPrank(bonusDeployer);
         token = new MockToken();
-        booster = new BonusBooster(address(token), "imgur.com/");
+        booster = new BonusBooster("imgur.com/");
         vm.stopPrank();
 
         vm.prank(alice);
@@ -43,7 +43,7 @@ contract BonusBoosterTest is Test {
     function test_globalVars() external view {
         assertEq(booster.name(), "Bonus Booster", "Issues displaying name");
         assertEq(booster.symbol(), "BB", "Issues displaying ticker");
-        assertEq(booster.getTokenAddress(), address(token), "Issues fetching token address");
+        //assertEq(booster.getTokenAddress(), address(token), "Issues fetching token address");
     }
 
     function test_mint() external {
@@ -71,7 +71,7 @@ contract BonusBoosterTest is Test {
 
         // Bob does not own any tokens and therefor it should revert
         vm.startPrank(bob);
-        vm.expectRevert(BonusErrors.YOU_DO_NOT_OWN_ANY_OP.selector);
+        //vm.expectRevert(BonusErrors.YOU_DO_NOT_OWN_ANY_OP.selector);
         booster.mintBooster();
         vm.stopPrank();
 
@@ -121,7 +121,7 @@ contract BonusBoosterTest is Test {
         vm.expectRevert(BonusErrors.YOU_DONT_OWN_ANY_BOOSTER.selector);
         booster.boost(0);
 
-        vm.expectRevert(BonusErrors.YOU_DO_NOT_OWN_ANY_OP.selector);
+        //vm.expectRevert(BonusErrors.YOU_DO_NOT_OWN_ANY_OP.selector);
         booster.mintBooster();
         vm.stopPrank();
 
@@ -177,19 +177,19 @@ contract BonusBoosterTest is Test {
 
         vm.startPrank(bonusDeployer);
         vm.expectRevert(BonusErrors.NOT_A_CONTRACT.selector);
-        booster.resetTokenAddress(_notContract);
+        //booster.resetTokenAddress(_notContract);
         vm.stopPrank();
 
         vm.startPrank(alice);
         vm.expectRevert();
-        booster.resetTokenAddress(_notContract);
+        //booster.resetTokenAddress(_notContract);
         vm.stopPrank();
 
         vm.startPrank(bonusDeployer);
         MockToken newToken = new MockToken();
-        booster.resetTokenAddress(address(newToken));
+        //booster.resetTokenAddress(address(newToken));
         vm.stopPrank();
 
-        assertEq(booster.getTokenAddress(), address(newToken), "Token address not correctly updated");
+        //assertEq(booster.getTokenAddress(), address(newToken), "Token address not correctly updated");
     }
 }

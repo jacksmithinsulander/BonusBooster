@@ -8,8 +8,8 @@ pragma solidity 0.8.27;
  *
  */
 library BonusErrors{
-    // Error thrown if user does not own any op tokens
-    error YOU_DO_NOT_OWN_ANY_OP();
+    // Error thrown if user is not on whitelist
+    error YOU_ARE_NOT_ON_THE_WHITELIST();
 
     // Error thrown if user does not own any boosters
     error YOU_DONT_OWN_ANY_BOOSTER();
@@ -22,4 +22,10 @@ library BonusErrors{
 
     // Error thrown if the token address is not a contract
     error NOT_A_CONTRACT();
+
+    // Error thrown if user about to get whitelisted is a contract address
+    error CANT_WHITELIST_CONTRACTS();
+
+    // Error if already whitelisted
+    error ALREADY_WHITELISTED();
 }
